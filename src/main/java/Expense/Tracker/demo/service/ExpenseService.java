@@ -1,40 +1,48 @@
 package Expense.Tracker.demo.service;
 
-import org.springframework.stereotype.Service;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import Expense.Tracker.demo.model.Expense;
+import Expense.Tracker.demo.repository.ExpenseRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExpenseService {
-    private final Map<Long, Expense> expenses = new ConcurrentHashMap<>();
-    private long currentId = 1;
+
+    @Autowired
+    private ExpenseRepository expenseRepository;
 
     public List<Expense> getAllExpenses() {
-        return new ArrayList<>(expenses.values());
+        return expenseRepository.findAll();
     }
 
-    public Expense getExpenseById(Long id) {
-        return expenses.get(id);
+    public Optional<Expense> getExpenseById(Long id) {
+        return expenseRepository.findById(id);
     }
 
     public Expense createExpense(Expense expense) {
-        expense.setId(currentId++);
-        expenses.put(expense.getId(), expense);
-        return expense;
+        return expenseRepository.save(expense);
     }
 
     public Expense updateExpense(Long id, Expense updatedExpense) {
-        if (expenses.containsKey(id)) {
-            updatedExpense.setId(id);
-            expenses.put(id, updatedExpense);
-            return updatedExpense;
-        }
-        return null;
+        return expenseRepository.findById(id)
+                .map(expense -> {
+                    expense.setAmount(updatedExpense.getAmount());
+                    expense.setDescription(updatedExpense.getDescription());
+                    expense.setDate(updatedExpense.getDate());
+                    expense.setCategory(updatedExpense.getCategory());
+                    expense.setLastUpdateTime(updatedExpense.getLastUpdateTime());
+                    return expenseRepository.save(expense);
+                })
+                .orElseGet(() -> {
+                    updatedExpense.setId(id);
+                    return expenseRepository.save(updatedExpense);
+                });
     }
 
-    public boolean deleteExpense(Long id) {
-        return expenses.remove(id) != null;
+    public void deleteExpense(Long id) {
+        expenseRepository.deleteById(id);
     }
 }

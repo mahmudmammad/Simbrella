@@ -1,18 +1,24 @@
 package Expense.Tracker.demo.model;
 
+import jakarta.persistence.*;
+
+@Entity
 public class Expense {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     private double amount;
     private String description;
     private String date;
     private String category;
-    private String lastUpdateTime; // New Field
+    private String lastUpdateTime;
 
-    // Constructor
+    // Default constructor
     public Expense() {}
 
-    public Expense(long id, double amount, String description, String date, String category, String lastUpdateTime) {
-        this.id = id;
+    // Parameterized constructor
+    public Expense(double amount, String description, String date, String category, String lastUpdateTime) {
         this.amount = amount;
         this.description = description;
         this.date = date;
