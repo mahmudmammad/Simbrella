@@ -1,6 +1,10 @@
 package Expense.Tracker.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 public class Expense {
@@ -10,38 +14,72 @@ public class Expense {
 
     private double amount;
     private String description;
-    private String date;
     private String category;
-    private String lastUpdateTime;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    public long getId() {
+        return id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private User user;
 
     // Default constructor
     public Expense() {}
 
-    // Parameterized constructor
-    public Expense(double amount, String description, String date, String category, String lastUpdateTime) {
+    // Constructor
+    public Expense(double amount, String description, String category) {
         this.amount = amount;
         this.description = description;
-        this.date = date;
         this.category = category;
-        this.lastUpdateTime = lastUpdateTime;
     }
 
-    // Getters and Setters
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public double getAmount() {
+        return amount;
+    }
 
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public String getCategory() {
+        return category;
+    }
 
-    public String getLastUpdateTime() { return lastUpdateTime; }
-    public void setLastUpdateTime(String lastUpdateTime) { this.lastUpdateTime = lastUpdateTime; }
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
