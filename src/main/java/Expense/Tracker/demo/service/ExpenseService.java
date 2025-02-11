@@ -4,7 +4,10 @@ import Expense.Tracker.demo.exception.ResourceNotFoundException;
 import Expense.Tracker.demo.model.Expense;
 import Expense.Tracker.demo.model.User;
 import Expense.Tracker.demo.repository.ExpenseRepository;
+import Expense.Tracker.demo.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,35 +21,47 @@ public class ExpenseService {
     @Autowired
     private UserService userService;
 
-    // Create expense for user
-    public Expense createExpense(Expense expense, Long userId) {
-        User user = userService.getUserById(userId);
-        expense.setUser(user);
+    private User getCurrentUser() {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        return userService.getUserById(userDetails.getUserId());
+    }
+
+    // Create expense
+    public Expense createExpense(Expense expense) {
+        User currentUser = getCurrentUser();
+        expense.setUser(currentUser);
         return expenseRepository.save(expense);
     }
 
-    // Get all expenses for user
-    public List<Expense> getAllExpensesForUser(Long userId) {
-        return expenseRepository.findByUserId(userId);
+    // Get all expenses for current user
+    public List<Expense> getAllExpenses() {
+        User currentUser = getCurrentUser();
+        return expenseRepository.findByUserId(currentUser.getId());
     }
 
-    // Get one expense (checking if it belongs to user)
-    public Expense getExpenseForUser(Long userId, Long expenseId) {
-        return expenseRepository.findByUserIdAndId(userId, expenseId)
+    // Get one expense
+    public Expense getExpense(Long expenseId) {
+        User currentUser = getCurrentUser();
+        return expenseRepository.findByUserIdAndId(currentUser.getId(), expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Expense not found with id " + expenseId + " for user " + userId));
+                        "Expense not found with id " + expenseId));
     }
 
-    public Expense updateExpense(Long userId, Long expenseId, Expense updatedExpense) {
-        Expense expense = getExpenseForUser(userId, expenseId);
+    // Update expense
+    public Expense updateExpense(Long expenseId, Expense updatedExpense) {
+        Expense expense = getExpense(expenseId); // This will check ownership
+
         expense.setAmount(updatedExpense.getAmount());
         expense.setDescription(updatedExpense.getDescription());
         expense.setCategory(updatedExpense.getCategory());
+
         return expenseRepository.save(expense);
     }
 
-    public void deleteExpense(Long userId, Long expenseId) {
-        Expense expense = getExpenseForUser(userId, expenseId);
+    // Delete expense
+    public void deleteExpense(Long expenseId) {
+        Expense expense = getExpense(expenseId); // This will check ownership
         expenseRepository.delete(expense);
     }
 }
