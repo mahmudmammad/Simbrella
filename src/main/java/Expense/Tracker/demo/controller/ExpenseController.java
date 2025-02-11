@@ -1,5 +1,6 @@
 package Expense.Tracker.demo.controller;
 
+import Expense.Tracker.demo.dto.ExpenseDTO;
 import Expense.Tracker.demo.model.Expense;
 import Expense.Tracker.demo.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -37,6 +41,29 @@ public class ExpenseController {
         return ResponseEntity.ok(expense);
     }
 
+    @GetMapping("/date-range")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByDateRange(
+            @RequestParam("startDate") String startDateStr,
+            @RequestParam("endDate") String endDateStr) {
+        LocalDate startDate = LocalDate.parse(startDateStr);
+        LocalDate endDate = LocalDate.parse(endDateStr);
+        List<ExpenseDTO> expenses = expenseService.getExpensesByDateRange(startDate, endDate)
+                .stream()
+                .map(ExpenseDTO::fromExpense)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(expenses);
+    }
+
+    // New endpoint to get expenses by category
+    @GetMapping("/category")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByCategory(@RequestParam("category") String category) {
+        List<ExpenseDTO> expenses = expenseService.getExpensesByCategory(category)
+                .stream()
+                .map(ExpenseDTO::fromExpense)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(expenses);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Expense> updateExpense(
             @PathVariable("id") Long expenseId,
@@ -53,4 +80,6 @@ public class ExpenseController {
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(successMessage, headers, HttpStatus.OK);
     }
+
+
 }

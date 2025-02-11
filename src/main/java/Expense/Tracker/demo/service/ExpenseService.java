@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -46,6 +48,18 @@ public class ExpenseService {
         return expenseRepository.findByUserIdAndId(currentUser.getId(), expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Expense not found with id " + expenseId));
+    }
+    public List<Expense> getExpensesByDateRange(LocalDate startDate, LocalDate endDate) {
+        User currentUser = getCurrentUser();
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay().minusSeconds(1);
+        return expenseRepository.findByUserIdAndCreatedAtBetween(currentUser.getId(), startDateTime, endDateTime);
+    }
+
+    // New method to get expenses by category
+    public List<Expense> getExpensesByCategory(String category) {
+        User currentUser = getCurrentUser();
+        return expenseRepository.findByUserIdAndCategory(currentUser.getId(), category);
     }
 
     // Update expense
