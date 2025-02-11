@@ -3,7 +3,9 @@ package Expense.Tracker.demo.controller;
 import Expense.Tracker.demo.model.Expense;
 import Expense.Tracker.demo.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -44,8 +46,11 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable("id") Long expenseId) {
+    public ResponseEntity<String> deleteExpense(@PathVariable("id") Long expenseId) {
         expenseService.deleteExpense(expenseId);
-        return ResponseEntity.noContent().build();
+        String successMessage = "Expense with ID " + expenseId + " has been successfully deleted.";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(successMessage, headers, HttpStatus.OK);
     }
 }
