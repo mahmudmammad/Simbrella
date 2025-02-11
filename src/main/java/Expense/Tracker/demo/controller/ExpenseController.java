@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("users/{userId}/expenses")
+@RequestMapping("users/expenses/{userId}")
 public class ExpenseController {
 
     @Autowired
@@ -77,7 +77,7 @@ public class ExpenseController {
             @PathVariable Long expenseId) {
         try {
             expenseService.deleteExpense(userId, expenseId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (ResourceNotFoundException ex) {
             throw ex;
         }
