@@ -26,7 +26,7 @@ A robust REST API for tracking personal expenses built with Spring Boot, featuri
 - Maven 
 - Your favorite IDE 
 - Postman (for testing API endpoints)
-## ## Getting Started
+
 ## Getting Started
 
 1. Clone the repository:
