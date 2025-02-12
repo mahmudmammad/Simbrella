@@ -51,6 +51,10 @@ public class Expense {
         this.category = category;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public double getAmount() {
         return amount;
     }
